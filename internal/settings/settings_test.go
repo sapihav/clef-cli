@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sapihav/clef/internal/settings"
+	"github.com/sapihav/clef-cli/internal/settings"
 )
 
 func TestLoad_MissingFile_ReturnsEmptyMap(t *testing.T) {

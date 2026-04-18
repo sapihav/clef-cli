@@ -1,4 +1,4 @@
-module github.com/sapihav/clef
+module github.com/sapihav/clef-cli
 
 go 1.25.6
 

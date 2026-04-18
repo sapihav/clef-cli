@@ -19,7 +19,7 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X github.com/sapihav/clef/cmd.version={{.Version}}
+      - -X github.com/sapihav/clef-cli/cmd.version={{.Version}}
 
 archives:
   - id: default
@@ -68,7 +68,7 @@ homebrew_casks:
       owner: sapihav
       name: homebrew-tap
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
-    homepage: https://github.com/sapihav/clef
+    homepage: https://github.com/sapihav/clef-cli
     description: Per-project Claude Code model and effort configuration
     license: MIT
     commit_author:

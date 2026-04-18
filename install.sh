@@ -2,9 +2,9 @@
 set -e
 
 # clef Installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/sapihav/clef/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/sapihav/clef-cli/main/install.sh | bash
 
-REPO="sapihav/clef"
+REPO="sapihav/clef-cli"
 BINARY_NAME="clef"
 DEFAULT_INSTALL_DIR="/usr/local/bin"
 FALLBACK_INSTALL_DIR="${HOME}/.local/bin"

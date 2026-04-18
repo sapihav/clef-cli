@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sapihav/clef/internal/settings"
+	"github.com/sapihav/clef-cli/internal/settings"
 	"github.com/spf13/cobra"
 )
 

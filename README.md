@@ -17,17 +17,17 @@ brew install sapihav/tap/clef
 **One-line installer (macOS, Linux):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/sapihav/clef/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/sapihav/clef-cli/main/install.sh | bash
 ```
 
 Installs to `/usr/local/bin` if writable, otherwise falls back to `$HOME/.local/bin`. Override with `INSTALL_DIR=/custom/path bash install.sh`.
 
-**Manual download:** grab a tarball from [releases](https://github.com/sapihav/clef/releases) and drop the binary on your `$PATH`.
+**Manual download:** grab a tarball from [releases](https://github.com/sapihav/clef-cli/releases) and drop the binary on your `$PATH`.
 
 **From source (Go 1.21+):**
 
 ```bash
-go install github.com/sapihav/clef@latest
+go install github.com/sapihav/clef-cli@latest
 ```
 
 ## Usage

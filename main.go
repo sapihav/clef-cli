@@ -7,7 +7,7 @@ package main
 import (
 	"os"
 
-	"github.com/sapihav/clef/cmd"
+	"github.com/sapihav/clef-cli/cmd"
 )
 
 func main() {
