@@ -6,7 +6,15 @@ set -e
 
 REPO="sapihav/clef"
 BINARY_NAME="clef"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+DEFAULT_INSTALL_DIR="/usr/local/bin"
+FALLBACK_INSTALL_DIR="${HOME}/.local/bin"
+# Track whether user explicitly set INSTALL_DIR (no fallback if they did)
+if [ -n "${INSTALL_DIR+x}" ]; then
+    USER_SET_INSTALL_DIR=1
+else
+    USER_SET_INSTALL_DIR=0
+    INSTALL_DIR="$DEFAULT_INSTALL_DIR"
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -111,28 +119,36 @@ install() {
     info "Extracting..."
     tar -xzf "$ARCHIVE_NAME"
 
-    # Install
-    if [ -w "$INSTALL_DIR" ]; then
-        mv "$BINARY_NAME" "$INSTALL_DIR/"
-    else
-        warn "${INSTALL_DIR} is not writable. Run with sudo or set INSTALL_DIR to a writable path:"
-        warn "  INSTALL_DIR=\$HOME/.local/bin bash install.sh"
-        error "Cannot install without write access to ${INSTALL_DIR}"
+    # Install — fall back to $HOME/.local/bin if default isn't writable
+    # (common on macOS where /usr/local/bin needs sudo). Skip fallback if
+    # user explicitly set INSTALL_DIR — respect their choice.
+    if [ ! -d "$INSTALL_DIR" ] || [ ! -w "$INSTALL_DIR" ]; then
+        if [ "$USER_SET_INSTALL_DIR" = "1" ]; then
+            warn "${INSTALL_DIR} is not writable. Run with sudo or choose a writable path:"
+            warn "  INSTALL_DIR=\$HOME/.local/bin bash install.sh"
+            error "Cannot install without write access to ${INSTALL_DIR}"
+        fi
+        warn "${INSTALL_DIR} is not writable, falling back to ${FALLBACK_INSTALL_DIR}"
+        INSTALL_DIR="$FALLBACK_INSTALL_DIR"
+        mkdir -p "$INSTALL_DIR" || error "Failed to create ${INSTALL_DIR}"
     fi
 
+    mv "$BINARY_NAME" "$INSTALL_DIR/"
+
     # Verify installation
-    if command -v "$BINARY_NAME" &> /dev/null; then
-        info "Successfully installed clef!"
+    if command -v "$BINARY_NAME" &> /dev/null && [ "$(command -v "$BINARY_NAME")" = "${INSTALL_DIR}/${BINARY_NAME}" ]; then
+        info "Successfully installed clef to ${INSTALL_DIR}/${BINARY_NAME}"
         echo ""
         "$BINARY_NAME" --version
         echo ""
         info "Run 'clef --help' to get started"
     else
-        warn "Installation complete, but '$BINARY_NAME' not found in PATH"
-        warn "You may need to add ${INSTALL_DIR} to your PATH"
+        info "Installed to ${INSTALL_DIR}/${BINARY_NAME}"
+        warn "${INSTALL_DIR} is not in your PATH — add it to use 'clef' directly:"
         echo ""
-        echo "Add this to your shell profile:"
         echo "  export PATH=\"${INSTALL_DIR}:\$PATH\""
+        echo ""
+        echo "Or run directly: ${INSTALL_DIR}/${BINARY_NAME} --version"
     fi
 }
 
