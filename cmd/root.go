@@ -8,6 +8,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// version is overridden by goreleaser ldflags at build time.
+var version = "dev"
+
 // Exit codes.
 const (
 	ExitSuccess = 0
@@ -20,6 +23,10 @@ var rootCmd = &cobra.Command{
 	Long:          "clef reads and writes .claude/settings.local.json in the current directory.\n\nIt lets developers set Claude Code model and effort level per project or worktree\nwithout touching global settings.",
 	SilenceUsage:  true,
 	SilenceErrors: true,
+}
+
+func init() {
+	rootCmd.Version = version
 }
 
 // Execute runs the root command and returns an exit code.
