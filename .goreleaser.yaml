@@ -23,7 +23,7 @@ builds:
 
 archives:
   - id: default
-    format: tar.gz
+    formats: [tar.gz]
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -59,3 +59,27 @@ release:
     name: clef
   draft: false
   prerelease: auto
+
+homebrew_casks:
+  - name: clef
+    binaries:
+      - clef
+    repository:
+      owner: sapihav
+      name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    homepage: https://github.com/sapihav/clef
+    description: Per-project Claude Code model and effort configuration
+    license: MIT
+    commit_author:
+      name: goreleaser-bot
+      email: bot@goreleaser.com
+    # Remove macOS quarantine bit so the unsigned binary runs without
+    # Gatekeeper's "cannot be opened" warning. If we add notarization
+    # later, this hook can be dropped.
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/clef"]
+          end
