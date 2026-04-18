@@ -1,5 +1,10 @@
 version: 2
 
+# Repo is `clef-cli` but the binary and archives use `clef` — overriding
+# project_name here pins archive filenames (e.g. clef_Darwin_arm64.tar.gz)
+# regardless of module/repo renames.
+project_name: clef
+
 before:
   hooks:
     - go mod tidy
