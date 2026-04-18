@@ -8,11 +8,27 @@ Claude Code's `/effort` and `/model` commands write to `~/.claude/settings.json`
 
 ## Install
 
+**Homebrew (macOS, Linux):**
+
+```bash
+brew install sapihav/tap/clef
+```
+
+**One-line installer (macOS, Linux):**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/sapihav/clef/main/install.sh | bash
+```
+
+Installs to `/usr/local/bin` if writable, otherwise falls back to `$HOME/.local/bin`. Override with `INSTALL_DIR=/custom/path bash install.sh`.
+
+**Manual download:** grab a tarball from [releases](https://github.com/sapihav/clef/releases) and drop the binary on your `$PATH`.
+
+**From source (Go 1.21+):**
+
 ```bash
 go install github.com/sapihav/clef@latest
 ```
-
-Requires Go 1.21+. Binary installs to `$GOPATH/bin` (usually `~/go/bin`).
 
 ## Usage
 
