@@ -28,17 +28,16 @@ func runShow(cmd *cobra.Command, args []string) error {
 			fmt.Printf("no settings file found at %s\n", path)
 			return nil
 		}
-		return userError("read settings: " + err.Error())
+		return sysError("read settings: " + err.Error())
 	}
 
-	// Re-marshal for pretty printing regardless of original formatting.
 	var m interface{}
 	if err := json.Unmarshal(data, &m); err != nil {
 		return userError("parse settings: " + err.Error())
 	}
 	out, err := json.MarshalIndent(m, "", "  ")
 	if err != nil {
-		return userError("format settings: " + err.Error())
+		return sysError("format settings: " + err.Error())
 	}
 	fmt.Println(string(out))
 	return nil

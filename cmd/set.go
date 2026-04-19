@@ -32,6 +32,7 @@ Example:
 func init() {
 	setCmd.Flags().StringVar(&flagModel, "model", "", "Claude model: sonnet|opus|haiku")
 	setCmd.Flags().StringVar(&flagEffort, "effort", "", "Effort level: low|medium|high|xhigh")
+	setCmd.Flags().BoolVar(&flagDryRun, "dry-run", false, "Print what would be written without writing")
 	rootCmd.AddCommand(setCmd)
 }
 
@@ -50,28 +51,45 @@ func runSet(cmd *cobra.Command, args []string) error {
 
 	data, err := settings.Load(".")
 	if err != nil {
-		return userError("read settings: " + err.Error())
+		return sysError("read settings: " + err.Error())
 	}
 
+	var resolvedModel string
 	if flagModel != "" {
-		resolved, _ := resolveModel(flagModel)
-		data["model"] = resolved
+		resolvedModel, _ = resolveModel(flagModel)
+		data["model"] = resolvedModel
 	}
 	if flagEffort != "" {
 		data["effortLevel"] = flagEffort
 	}
 
-	if err := settings.Save(".", data); err != nil {
-		return userError("write settings: " + err.Error())
+	if flagDryRun {
+		writeJSON(data)
+		return nil
 	}
 
-	var parts []string
-	if flagModel != "" {
-		parts = append(parts, "model="+flagModel)
+	if err := settings.Save(".", data); err != nil {
+		return sysError("write settings: " + err.Error())
 	}
-	if flagEffort != "" {
-		parts = append(parts, "effort="+flagEffort)
+
+	if flagJSON {
+		out := map[string]interface{}{"file": settings.FilePath(".")}
+		if resolvedModel != "" {
+			out["model"] = resolvedModel
+		}
+		if flagEffort != "" {
+			out["effortLevel"] = flagEffort
+		}
+		writeJSON(out)
+	} else {
+		var parts []string
+		if resolvedModel != "" {
+			parts = append(parts, "model="+resolvedModel)
+		}
+		if flagEffort != "" {
+			parts = append(parts, "effort="+flagEffort)
+		}
+		fmt.Printf("%s → %s\n", strings.Join(parts, " "), settings.FilePath("."))
 	}
-	fmt.Printf("%s → %s\n", strings.Join(parts, " "), settings.FilePath("."))
 	return nil
 }
