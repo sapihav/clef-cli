@@ -8,19 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var validModels = map[string]bool{
-	"sonnet": true,
-	"opus":   true,
-	"haiku":  true,
-}
-
-var validEfforts = map[string]bool{
-	"low":    true,
-	"medium": true,
-	"high":   true,
-	"xhigh":  true,
-}
-
 var (
 	flagModel  string
 	flagEffort string
@@ -33,11 +20,11 @@ var setCmd = &cobra.Command{
 
 At least one flag must be provided. Existing keys are preserved.
 
-Valid models:  sonnet, opus, haiku
+Valid models:  sonnet, opus, haiku, opus4.7, sonnet4.6, haiku4.5, or any claude-* id
 Valid efforts: low, medium, high, xhigh
 
 Example:
-  clef set --model opus --effort xhigh
+  clef set --model opus4.7 --effort xhigh
   clef set --effort low`,
 	RunE: runSet,
 }
@@ -52,8 +39,10 @@ func runSet(cmd *cobra.Command, args []string) error {
 	if flagModel == "" && flagEffort == "" {
 		return userError("at least one of --model or --effort must be provided")
 	}
-	if flagModel != "" && !validModels[flagModel] {
-		return userError(fmt.Sprintf("invalid --model %q (want sonnet|opus|haiku)", flagModel))
+	if flagModel != "" {
+		if _, err := resolveModel(flagModel); err != nil {
+			return userError("--model: " + err.Error())
+		}
 	}
 	if flagEffort != "" && !validEfforts[flagEffort] {
 		return userError(fmt.Sprintf("invalid --effort %q (want low|medium|high|xhigh)", flagEffort))
@@ -65,7 +54,8 @@ func runSet(cmd *cobra.Command, args []string) error {
 	}
 
 	if flagModel != "" {
-		data["model"] = flagModel
+		resolved, _ := resolveModel(flagModel)
+		data["model"] = resolved
 	}
 	if flagEffort != "" {
 		data["effortLevel"] = flagEffort
