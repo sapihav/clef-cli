@@ -33,16 +33,56 @@ go install github.com/sapihav/clef-cli@latest
 ## Usage
 
 ```bash
-clef set --model opus --effort xhigh   # pin model and effort for this directory
-clef set --effort medium               # change effort only
-clef set --model sonnet                # change model only
-clef show                              # print current local settings
-clef reset                             # remove model and effortLevel overrides
+clef model opus4.7          # set model for this directory
+clef effort xhigh           # set effort level
+clef show                   # print current local settings
+clef reset                  # remove model and effortLevel overrides
+clef schema                 # print full command tree as JSON (agent-friendly)
 ```
 
-Valid values:
-- `--model`: `sonnet`, `opus`, `haiku`
-- `--effort`: `low`, `medium`, `high`, `xhigh`
+`set` is also available for backward compatibility:
+
+```bash
+clef set --model sonnet --effort medium
+```
+
+### Model values
+
+| Input | Stored as |
+|-------|-----------|
+| `sonnet` | `sonnet` |
+| `opus` | `opus` |
+| `haiku` | `haiku` |
+| `opus4.7` | `claude-opus-4-7` |
+| `opus4.6` | `claude-opus-4-6` |
+| `sonnet4.6` | `claude-sonnet-4-6` |
+| `haiku4.5` | `claude-haiku-4-5` |
+| `claude-*` (any) | passed through as-is |
+
+### Effort values
+
+`low`, `medium`, `high`, `xhigh`
+
+## Global flags
+
+| Flag | Effect |
+|------|--------|
+| `--json` | Structured JSON to stdout |
+| `--json-errors` | Structured JSON errors to stderr |
+| `--dry-run` | Print what would be written, no disk write (mutating commands only) |
+
+Examples:
+
+```bash
+clef model opus4.7 --json
+# {"model":"claude-opus-4-7","file":".claude/settings.local.json"}
+
+clef reset --dry-run
+# {"would_remove":["model","effortLevel"],"file":".claude/settings.local.json"}
+
+clef model invalid --json-errors
+# stderr: {"error":"invalid model \"invalid\"","code":1}
+```
 
 ## How it works
 
@@ -64,12 +104,12 @@ Reads and writes `.claude/settings.local.json` in the current working directory.
 # Heavy feature branch — use Opus with max thinking
 git worktree add ../myproject-feature -b feat/big-thing
 cd ../myproject-feature
-clef set --model opus --effort xhigh
+clef model opus4.7 && clef effort xhigh
 
 # Quick bug fix — Sonnet is fine
 git worktree add ../myproject-hotfix -b fix/typo
 cd ../myproject-hotfix
-clef set --model sonnet --effort medium
+clef model sonnet && clef effort medium
 ```
 
 Each worktree directory maintains its own `.claude/settings.local.json`.
@@ -79,7 +119,8 @@ Each worktree directory maintains its own `.claude/settings.local.json`.
 | Code | Meaning |
 |------|---------|
 | `0` | Success |
-| `1` | User/config error (invalid flag value, nothing to reset, etc.) |
+| `1` | User/config error (invalid value, nothing to reset, etc.) |
+| `2` | System error (file read/write failure) |
 
 ## License
 
