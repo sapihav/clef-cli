@@ -43,6 +43,7 @@ var modelCmd = &cobra.Command{
 }
 
 func init() {
+	modelCmd.Flags().BoolVar(&flagDryRun, "dry-run", false, "Print what would be written without writing")
 	rootCmd.AddCommand(modelCmd)
 }
 
@@ -54,13 +55,23 @@ func runModel(cmd *cobra.Command, args []string) error {
 
 	data, err := settings.Load(".")
 	if err != nil {
-		return userError("read settings: " + err.Error())
+		return sysError("read settings: " + err.Error())
 	}
 	data["model"] = resolved
-	if err := settings.Save(".", data); err != nil {
-		return userError("write settings: " + err.Error())
+
+	if flagDryRun {
+		writeJSON(data)
+		return nil
 	}
 
-	fmt.Printf("model=%s → %s\n", resolved, settings.FilePath("."))
+	if err := settings.Save(".", data); err != nil {
+		return sysError("write settings: " + err.Error())
+	}
+
+	if flagJSON {
+		writeJSON(map[string]interface{}{"model": resolved, "file": settings.FilePath(".")})
+	} else {
+		fmt.Printf("model=%s → %s\n", resolved, settings.FilePath("."))
+	}
 	return nil
 }

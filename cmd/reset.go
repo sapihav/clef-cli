@@ -17,28 +17,43 @@ All other keys are preserved. If the file does not exist, this is a no-op.`,
 }
 
 func init() {
+	resetCmd.Flags().BoolVar(&flagDryRun, "dry-run", false, "Print what would be written without writing")
 	rootCmd.AddCommand(resetCmd)
 }
 
 func runReset(cmd *cobra.Command, args []string) error {
 	path := settings.FilePath(".")
+
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		fmt.Printf("no settings file at %s — nothing to reset\n", path)
+		if flagJSON {
+			writeJSON(map[string]interface{}{"removed": []string{}, "file": path})
+		} else {
+			fmt.Printf("no settings file at %s — nothing to reset\n", path)
+		}
 		return nil
 	}
 
 	data, err := settings.Load(".")
 	if err != nil {
-		return userError("read settings: " + err.Error())
+		return sysError("read settings: " + err.Error())
 	}
 
 	delete(data, "model")
 	delete(data, "effortLevel")
 
-	if err := settings.Save(".", data); err != nil {
-		return userError("write settings: " + err.Error())
+	if flagDryRun {
+		writeJSON(data)
+		return nil
 	}
 
-	fmt.Printf("model and effortLevel removed from %s\n", path)
+	if err := settings.Save(".", data); err != nil {
+		return sysError("write settings: " + err.Error())
+	}
+
+	if flagJSON {
+		writeJSON(map[string]interface{}{"removed": []string{"model", "effortLevel"}, "file": path})
+	} else {
+		fmt.Printf("model and effortLevel removed from %s\n", path)
+	}
 	return nil
 }
